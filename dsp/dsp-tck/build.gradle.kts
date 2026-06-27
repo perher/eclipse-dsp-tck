@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.junit.platform.launcher)
     testImplementation(project(":dsp:dsp-contract-negotiation"))
     testImplementation(project(":dsp:dsp-transfer-process"))
+    testImplementation(project(":dsp:dsp-catalog"))
 }
 
 
