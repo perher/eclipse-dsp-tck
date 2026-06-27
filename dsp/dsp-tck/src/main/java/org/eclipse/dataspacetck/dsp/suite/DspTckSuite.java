@@ -27,9 +27,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import static java.lang.Boolean.parseBoolean;
 import static org.eclipse.dataspacetck.core.api.system.SystemsConstants.TCK_LAUNCHER;
+import static org.eclipse.dataspacetck.core.api.system.SystemsConstants.TCK_PREFIX;
 import static org.eclipse.dataspacetck.core.system.ConsoleMonitor.ANSI_PROPERTY;
 import static org.eclipse.dataspacetck.core.system.ConsoleMonitor.DEBUG_PROPERTY;
 
@@ -41,6 +43,7 @@ public class DspTckSuite {
     private static final String CONFIG = "-config";
     private static final String DEFAULT_LAUNCHER = "org.eclipse.dataspacetck.dsp.system.DspSystemLauncher";
     private static final String TEST_PACKAGE = "org.eclipse.dataspacetck.dsp.verification";
+    private static final String TCK_TEST_PACKAGE = TCK_PREFIX + ".test.package";
 
     public static void main(String... args) {
         var properties = processEnv(args);
@@ -49,10 +52,16 @@ public class DspTckSuite {
         }
         var monitor = createMonitor(properties);
         monitor.enableBold().message("\u001B[1mRunning DSP TCK v" + VERSION + "\u001B[0m").resetMode();
-        var result = TckRuntime.Builder.newInstance()
+
+        var packages = properties.getOrDefault(TCK_TEST_PACKAGE, TEST_PACKAGE).split(",");
+
+        var runtimeBuilder = TckRuntime.Builder.newInstance()
                 .properties(properties)
-                .addPackage(TEST_PACKAGE)
-                .monitor(monitor)
+                .monitor(monitor);
+
+        Stream.of(packages).forEach(runtimeBuilder::addPackage);
+
+        var result = runtimeBuilder
                 .build().execute();
 
         new ConsoleResultWriter(monitor).output(result);
